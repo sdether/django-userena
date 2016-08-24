@@ -1,4 +1,6 @@
 from django.conf import settings
+from django.contrib.auth import get_user_model as _get_user_model
+from django.shortcuts import get_object_or_404
 from django.utils.encoding import smart_bytes
 from django.utils.functional import allow_lazy
 from django.utils.http import urlencode
@@ -194,3 +196,9 @@ def get_user_model():
                   "django-userena.", DeprecationWarning)
     from django.contrib.auth import get_user_model
     return get_user_model()
+
+
+def get_user_or_404(username):
+    user_model = _get_user_model()
+    kwargs  = {user_model.USERNAME_FIELD + '__iexact': username}
+    return get_object_or_404(user_model, **kwargs)

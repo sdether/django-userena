@@ -1,5 +1,5 @@
 from django.core.urlresolvers import reverse
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect
 from django.contrib.auth import authenticate, login, logout, REDIRECT_FIELD_NAME
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordChangeForm
@@ -15,7 +15,7 @@ from userena.forms import (SignupForm, SignupFormOnlyEmail, AuthenticationForm,
                            ChangeEmailForm, EditProfileForm)
 from userena.models import UserenaSignup
 from userena.decorators import secure_required
-from userena.utils import signin_redirect, get_profile_model, get_user_profile
+from userena.utils import signin_redirect, get_profile_model, get_user_profile, get_user_or_404
 from userena import signals as userena_signals
 from userena import settings as userena_settings
 
@@ -340,7 +340,7 @@ def direct_to_user_template(request, username, template_name,
         The currently :class:`User` that is viewed.
 
     """
-    user = get_object_or_404(get_user_model(), username__iexact=username)
+    user = get_user_or_404(username)
 
     if not extra_context: extra_context = dict()
     extra_context['viewed_user'] = user
@@ -375,7 +375,7 @@ def disabled_account(request, username, template_name, extra_context=None):
         Profile of the viewed user.
 
     """
-    user = get_object_or_404(get_user_model(), username__iexact=username)
+    user = get_user_or_404(username)
 
     if user.is_active:
         raise Http404
@@ -536,7 +536,7 @@ def email_change(request, username, email_form=ChangeEmailForm,
     permissions to alter the email address of others.
 
     """
-    user = get_object_or_404(get_user_model(), username__iexact=username)
+    user = get_user_or_404(username)
     prev_email = user.email
     form = email_form(user)
 
@@ -603,8 +603,7 @@ def password_change(request, username, template_name='userena/password_form.html
         Form used to change the password.
 
     """
-    user = get_object_or_404(get_user_model(),
-                             username__iexact=username)
+    user = get_user_or_404(username)
 
     form = pass_form(user=user)
 
@@ -673,7 +672,8 @@ def profile_edit(request, username, edit_profile_form=EditProfileForm,
         Instance of the ``Profile`` that is edited.
 
     """
-    user = get_object_or_404(get_user_model(), username__iexact=username)
+    user_model = get_user_model()
+    user = get_user_or_404(username)
 
     profile = get_user_profile(user=user)
 
@@ -729,7 +729,7 @@ def profile_detail(request, username,
         Instance of the currently viewed ``Profile``.
 
     """
-    user = get_object_or_404(get_user_model(), username__iexact=username)
+    user = get_user_or_404(username)
     profile = get_user_profile(user=user)
     if not profile.can_view_profile(request.user):
         raise PermissionDenied
