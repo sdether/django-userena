@@ -672,7 +672,6 @@ def profile_edit(request, username, edit_profile_form=EditProfileForm,
         Instance of the ``Profile`` that is edited.
 
     """
-    user_model = get_user_model()
     user = get_user_or_404(username)
 
     profile = get_user_profile(user=user)
